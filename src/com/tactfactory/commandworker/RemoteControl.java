@@ -1,5 +1,6 @@
 package com.tactfactory.commandworker;
 
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -19,9 +20,17 @@ public class RemoteControl {
 		this.executor = Executors.newCachedThreadPool(); 
 	}
 
-	public void execute() {
-		if (!this.executor.isShutdown()) {
-			this.executor.submit(command);
+	public Integer execute(int commandIndex) {
+		if (!this.executor.isShutdown() && !Thread.interrupted()) {
+			try {
+				this.executor.submit(command).get();
+				return commandIndex;
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}else{
+			return null;
 		}
 	}
 }
