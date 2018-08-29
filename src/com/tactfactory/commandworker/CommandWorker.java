@@ -24,15 +24,41 @@ public class CommandWorker extends Thread {
 	public void add(Command<?> command) {
 		this.commands.add(command);
 		this.maxCommand++;
+		
+		if (!this.loop) {
+			this.start(this.currentCommand);
+		}
 	}
 
 	public void start(Integer commandIndex) {
-		if (this.commands.size() > commandIndex + 1 && commandIndex > -1) {
+		if (this.commands.size() >= commandIndex + 1 && commandIndex > -1) {
 			this.loop = true;
 			this.currentCommand = commandIndex;
 			this.currentExecutor = Executors.newCachedThreadPool();
 			this.control = new RemoteControl();
 			this.currentExecutor.submit(this);
+		}
+	}
+	
+	public void playSingle(Integer commandIndex){
+		if (commandIndex > -1 && commandIndex < this.commands.size()) {
+			RemoteControl tempRemote = new RemoteControl();
+			tempRemote.setCommand(this.commands.get(commandIndex));
+			tempRemote.execute(commandIndex);
+		}
+	}
+	
+	public void previous(){
+		if (this.currentCommand - 1 > -1) {
+			this.currentCommand--;
+			this.playSingle(this.currentCommand);
+		}
+	}
+	
+	public void next(){
+		if (this.currentCommand + 1 < this.commands.size()) {
+			this.currentCommand++;
+			this.playSingle(this.currentCommand);
 		}
 	}
 
